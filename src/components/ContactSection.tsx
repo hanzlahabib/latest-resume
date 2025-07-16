@@ -63,14 +63,9 @@ export function ContactSection() {
               <p className="text-gray-400 text-sm mb-4">
                 Professional network and career journey
               </p>
-              <a 
-                href="https://www.linkedin.com/in/hanzla-habib-3a3108263/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-[#0077b5] hover:text-white transition-colors font-medium"
-              >
-                Connect with me →
-              </a>
+              <span className="text-[#0077b5] font-medium">
+                Hanzla Habib
+              </span>
             </div>
           </div>
 
