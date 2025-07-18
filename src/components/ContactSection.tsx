@@ -104,11 +104,11 @@ export function ContactSection() {
               or want to collaborate on something amazing - I'm here to help solve problems and build solutions.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="cursor-hover group px-8 py-4 bg-[#ff6b35] text-white rounded-full font-semibold text-lg transition-all duration-300 hover:bg-white hover:text-[#ff6b35] border-2 border-[#ff6b35]">
+            <div className="flex flex-col sm:flex-row gap-40 justify-center">
+              <button className="cursor-hover group px-4 py-4 bg-[#ff6b35] text-white rounded-full font-semibold text-lg transition-all duration-300 hover:bg-white hover:text-[#ff6b35] border-2 border-[#ff6b35]">
                 Start a Project
               </button>
-              <button className="cursor-hover group px-8 py-4 border-2 border-white text-white rounded-full font-semibold text-lg transition-all duration-300 hover:bg-white hover:text-black">
+              <button className="cursor-hover group px-4 py-4 border-2 border-white text-white rounded-full font-semibold text-lg transition-all duration-300 hover:bg-white hover:text-black">
                 Schedule a Call
               </button>
             </div>

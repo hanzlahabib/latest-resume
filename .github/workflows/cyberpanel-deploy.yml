@@ -1,0 +1,58 @@
+name: Deploy to CyberPanel
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Build project
+      run: npm run build
+      
+    - name: Deploy to CyberPanel Server
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        port: ${{ secrets.PORT }}
+        script: |
+          cd /home/${{ secrets.DOMAIN_USER }}/public_html
+          
+          # Backup current deployment
+          if [ -d "backup" ]; then rm -rf backup; fi
+          if [ -d ".next" ]; then mv .next backup; fi
+          
+          # Pull latest code
+          git pull origin main || (git fetch --all && git reset --hard origin/main)
+          
+          # Install dependencies
+          npm ci --production
+          
+          # Build the project
+          npm run build
+          
+          # Restart Node.js app via CyberPanel API or manual restart
+          # Option 1: Manual restart (recommended)
+          pkill -f "node.*server.js" || true
+          nohup node server.js > app.log 2>&1 &
+          
+          # Option 2: Using PM2 (if installed)
+          # pm2 restart portfolio || pm2 start server.js --name portfolio
+          
+          echo "✅ Deployment completed successfully!"

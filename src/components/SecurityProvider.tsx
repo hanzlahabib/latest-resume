@@ -37,16 +37,32 @@ export function SecurityProvider({ children }: { children: React.ReactNode }) {
 
     document.addEventListener('dragstart', handleDragStart)
 
-    // Console warning
-    console.clear()
-    console.log('%cSTOP!', 'color: red; font-size: 50px; font-weight: bold;')
-    console.log('%cThis is a browser feature intended for developers. Source code protection is active.', 'color: red; font-size: 16px;')
-    console.log('%c🚀 Impressed by this portfolio? Let\'s connect: LinkedIn - Hanzla Habib', 'color: #ff6b35; font-size: 14px;')
+    // Console protection and contact message
+    const showContactMessage = () => {
+      console.clear()
+      console.log('%cSTOP!', 'color: red; font-size: 50px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);')
+      console.log('%cThis is a browser feature intended for developers.', 'color: red; font-size: 16px; font-weight: bold;')
+      console.log('%cSource code protection is active. 🔒', 'color: #ff4444; font-size: 14px;')
+      console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff6b35;')
+      console.log('%c🚀 IMPRESSED BY THIS PORTFOLIO?', 'color: #ff6b35; font-size: 18px; font-weight: bold;')
+      console.log('%c💼 Looking for a Senior Frontend Developer?', 'color: #4CAF50; font-size: 14px; font-weight: bold;')
+      console.log('%c📧 Contact Hanzla: hanzlahabib99@gmail.com', 'color: #2196F3; font-size: 14px; font-weight: bold;')
+      console.log('%c🔗 LinkedIn: https://linkedin.com/in/hanzla-habib', 'color: #0077B5; font-size: 14px; font-weight: bold;')
+      console.log('%c🌟 "From crisis to code - evolution through challenge"', 'color: #9C27B0; font-size: 12px; font-style: italic;')
+      console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #ff6b35;')
+    }
+
+    // Show initial message
+    showContactMessage()
+
+    // Show message periodically (every 30 seconds)
+    const messageInterval = setInterval(showContactMessage, 30000)
 
     return () => {
       document.removeEventListener('contextmenu', handleContextMenu)
       document.removeEventListener('keydown', handleKeyDown)
       document.removeEventListener('dragstart', handleDragStart)
+      clearInterval(messageInterval)
     }
   }, [])
 

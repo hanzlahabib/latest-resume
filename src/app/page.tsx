@@ -19,10 +19,10 @@ export default function Home() {
   const mainRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    // Wait for body to be available
+    if (typeof window === 'undefined') return
+
     const ctx = gsap.context(() => {
-      // Smooth scroll setup
-      gsap.set('body', { overflow: 'hidden' })
-      
       // Initial loading animation
       const tl = gsap.timeline()
       
@@ -38,7 +38,6 @@ export default function Home() {
         ease: 'power3.inOut',
         delay: 1
       })
-      .set('body', { overflow: 'auto' })
       
     }, mainRef)
 
@@ -48,7 +47,7 @@ export default function Home() {
   return (
     <main ref={mainRef} className="relative min-h-screen bg-black text-white overflow-x-hidden">
       {/* Loading Screen */}
-      <div className="loading-screen fixed inset-0 bg-black z-50 flex items-center justify-center">
+      <div className="loading-screen fixed inset-0 bg-black z-[100] flex items-center justify-center">
         <div className="loading-text">
           <h1 className="text-6xl font-bold text-center">
             <span className="text-[#ff6b35]">HANZLA</span>
@@ -71,18 +70,20 @@ export default function Home() {
       <Navigation />
       
       {/* Sections */}
-      <HeroSection />
-      <AboutSection />
-      <ExperienceTimeline />
-      <SkillsSection />
-      <ProjectsSection />
-      <ContactSection />
+      <div className="relative z-10">
+        <HeroSection />
+        <AboutSection />
+        <ExperienceTimeline />
+        <SkillsSection />
+        <ProjectsSection />
+        <ContactSection />
+      </div>
       
       {/* Footer */}
       <footer className="relative z-10 bg-black/90 backdrop-blur-sm border-t border-gray-800 py-6">
         <div className="container mx-auto px-6 text-center">
           <p className="text-gray-400">
-            © 2024 Hanzla Habib. Crafted with 💻 and lots of ☕
+            © 2025 Hanzla Habib. Crafted with 💻 and lots of ☕
           </p>
           <p className="text-sm text-gray-500 mt-2">
             "From designer to developer - evolution through crisis"

@@ -78,7 +78,7 @@ export function Navigation() {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-8">
+          <div className="hidden lg:flex items-center space-x-8 gap-4">
             {navItems.map((item, index) => (
               <button
                 key={index}

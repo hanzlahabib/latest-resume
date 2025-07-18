@@ -80,22 +80,11 @@ export function ProjectsSection() {
   const [activeProject, setActiveProject] = useState<number | null>(null)
 
   useEffect(() => {
+    // Simple fade-in animation without ScrollTrigger for now
+    if (!sectionRef.current) return
+    
     const ctx = gsap.context(() => {
-      // Projects animation
-      gsap.from('.project-card', {
-        y: 100,
-        opacity: 0,
-        duration: 1,
-        stagger: 0.1,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top 80%',
-          end: 'bottom 20%',
-          toggleActions: 'play none none reverse'
-        }
-      })
-
+      gsap.set('.project-card', { opacity: 1, y: 0 })
     }, sectionRef)
 
     return () => ctx.revert()
@@ -104,27 +93,27 @@ export function ProjectsSection() {
   return (
     <section 
       ref={sectionRef}
-      className="relative py-32 px-6 bg-gradient-to-b from-gray-900 to-black"
+      className="relative py-16 md:py-32 px-4 md:px-6 bg-gradient-to-b from-gray-900 to-black"
       id="projects"
     >
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
-        <div className="text-center mb-20">
-          <h2 className="text-4xl md:text-5xl font-black text-white mb-6">
+        <div className="text-center mb-20 md:mb-60">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-4 md:mb-6">
             PROJECTS
             <span className="text-[#ff6b35]">.</span>
           </h2>
-          <p className="text-lg text-gray-300 max-w-3xl mx-auto">
+          <p className="text-base md:text-lg text-gray-300 max-w-3xl mx-auto px-4">
             From crisis-driven learning projects to enterprise-scale solutions - each one a milestone in my evolution
           </p>
         </div>
 
         {/* Projects Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
           {projects.map((project, index) => (
             <div 
               key={project.id}
-              className="project-card cursor-hover group relative bg-gray-800/30 backdrop-blur-sm rounded-2xl p-6 border border-gray-700 hover:border-[#ff6b35] transition-all duration-300 hover:transform hover:scale-102"
+              className="project-card cursor-hover group relative bg-gray-800/30 backdrop-blur-sm rounded-xl md:rounded-2xl p-3 md:p-6 border border-gray-700 hover:border-[#ff6b35] transition-all duration-300 hover:transform hover:scale-102"
               onMouseEnter={() => setActiveProject(project.id)}
               onMouseLeave={() => setActiveProject(null)}
             >
@@ -137,24 +126,24 @@ export function ProjectsSection() {
                   <span className="text-sm text-gray-400 font-mono">{project.year}</span>
                 </div>
                 
-                <h3 className="text-xl font-bold text-white mb-1 group-hover:text-[#ff6b35] transition-colors">
+                <h3 className="text-sm md:text-xl font-bold text-white mb-1 group-hover:text-[#ff6b35] transition-colors">
                   {project.title}
                 </h3>
                 
-                <p className="text-sm text-gray-400 mb-3">{project.company}</p>
+                <p className="text-xs md:text-sm text-gray-400 mb-2 md:mb-3">{project.company}</p>
               </div>
 
               {/* Description */}
-              <p className="text-gray-300 text-sm leading-relaxed mb-4">
+              <p className="text-gray-300 text-xs md:text-sm leading-relaxed mb-3 md:mb-4">
                 {project.description}
               </p>
 
               {/* Tech Stack */}
-              <div className="flex flex-wrap gap-1 mb-4">
+              <div className="flex flex-wrap gap-1 md:gap-2 mb-3 md:mb-4">
                 {project.tech.map((tech, techIndex) => (
                   <span 
                     key={techIndex}
-                    className="text-xs px-2 py-1 bg-gray-700/50 text-gray-300 rounded"
+                    className="text-xs px-1.5 py-0.5 md:px-2 md:py-1 bg-gray-700/50 text-gray-300 rounded"
                   >
                     {tech}
                   </span>
@@ -187,40 +176,40 @@ export function ProjectsSection() {
         </div>
 
         {/* Crisis to Success Story */}
-        <div className="mt-16 bg-gradient-to-r from-gray-800 to-gray-900 rounded-2xl p-8 border border-gray-700">
-          <div className="text-center mb-8">
-            <h3 className="text-3xl font-bold text-white mb-4">
+        <div className="mt-60 md:mt-60 bg-gradient-to-r from-gray-800 to-gray-900 rounded-2xl p-4 md:p-8 border border-gray-700">
+          <div className="text-center mb-6 md:mb-8">
+            <h3 className="text-xl md:text-2xl lg:text-3xl font-bold text-white mb-4">
               The Crisis Project That Changed Everything 🔥
             </h3>
-            <p className="text-gray-300 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-sm md:text-base text-gray-300 max-w-3xl mx-auto leading-relaxed px-2">
               The e-commerce project at Regbits wasn't just a job - it was survival. Faced with complex requirements 
               I didn't understand, using technologies I'd never touched, with a deadline that seemed impossible. 
               That crisis forced me to evolve from designer to developer overnight.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 text-center">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 text-center">
             <div>
-              <div className="text-3xl mb-2">😰</div>
-              <h4 className="text-lg font-bold text-white mb-2">The Crisis</h4>
-              <p className="text-gray-400 text-sm">Complex project, zero backend knowledge, tight deadline</p>
+              <div className="text-2xl md:text-3xl mb-2">😰</div>
+              <h4 className="text-base md:text-lg font-bold text-white mb-2">The Crisis</h4>
+              <p className="text-gray-400 text-xs md:text-sm">Complex project, zero backend knowledge, tight deadline</p>
             </div>
             <div>
-              <div className="text-3xl mb-2">🔥</div>
-              <h4 className="text-lg font-bold text-white mb-2">The Evolution</h4>
-              <p className="text-gray-400 text-sm">72-hour coding marathons, YouTube university, trial by fire</p>
+              <div className="text-2xl md:text-3xl mb-2">🔥</div>
+              <h4 className="text-base md:text-lg font-bold text-white mb-2">The Evolution</h4>
+              <p className="text-gray-400 text-xs md:text-sm">72-hour coding marathons, YouTube university, trial by fire</p>
             </div>
             <div>
-              <div className="text-3xl mb-2">🚀</div>
-              <h4 className="text-lg font-bold text-white mb-2">The Transformation</h4>
-              <p className="text-gray-400 text-sm">Full-stack developer born, career trajectory changed forever</p>
+              <div className="text-2xl md:text-3xl mb-2">🚀</div>
+              <h4 className="text-base md:text-lg font-bold text-white mb-2">The Transformation</h4>
+              <p className="text-gray-400 text-xs md:text-sm">Full-stack developer born, career trajectory changed forever</p>
             </div>
           </div>
         </div>
 
         {/* GitHub Stats */}
         <div className="mt-12 text-center">
-          <p className="text-gray-400 mb-4">Curious about the code behind these projects?</p>
+          <p className="text-gray-400 mb-20 ">Curious about the code behind these projects?</p>
           <button className="cursor-hover group relative px-8 py-4 bg-gray-800 text-white rounded-full font-semibold transition-all duration-300 hover:bg-[#ff6b35] border border-gray-600 hover:border-[#ff6b35]">
             <span className="flex items-center space-x-2">
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">

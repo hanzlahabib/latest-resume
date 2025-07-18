@@ -53,34 +53,11 @@ export function SkillsSection() {
   const sectionRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
+    // Simple fade-in animation without ScrollTrigger for now
+    if (!sectionRef.current) return
+    
     const ctx = gsap.context(() => {
-      // Skills animation
-      gsap.from('.skill-category', {
-        y: 100,
-        opacity: 0,
-        duration: 1,
-        stagger: 0.2,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top 80%',
-          end: 'bottom 20%',
-          toggleActions: 'play none none reverse'
-        }
-      })
-
-      // Skill bars animation
-      gsap.from('.skill-bar', {
-        width: '0%',
-        duration: 1.5,
-        ease: 'power3.out',
-        stagger: 0.1,
-        scrollTrigger: {
-          trigger: '.skills-grid',
-          start: 'top 70%',
-        }
-      })
-
+      gsap.set('.skill-category', { opacity: 1, y: 0 })
     }, sectionRef)
 
     return () => ctx.revert()
@@ -105,40 +82,38 @@ export function SkillsSection() {
         </div>
 
         {/* Skills Grid */}
-        <div className="skills-grid grid md:grid-cols-2 xl:grid-cols-4 gap-8">
+        <div className="skills-grid grid grid-cols-1 md:grid-cols-2 gap-8">
           {skillCategories.map((category, categoryIndex) => (
             <div 
               key={categoryIndex}
-              className="skill-category bg-gray-800/30 backdrop-blur-sm rounded-2xl p-6 border border-gray-700 hover:border-[#ff6b35] transition-all duration-300"
+              className="skill-category bg-gray-800/30 backdrop-blur-sm rounded-2xl p-8 border border-gray-700 hover:border-[#ff6b35] transition-all duration-300"
             >
               {/* Category Header */}
-              <div className="flex items-center mb-4">
-                <span className="text-2xl mr-2">{category.icon}</span>
-                <h3 className="text-lg font-bold text-white">{category.title}</h3>
+              <div className="text-center mb-6">
+                <span className="text-3xl">{category.icon}</span>
+                <h3 className="text-xl font-bold text-white mt-2">{category.title}</h3>
               </div>
 
               {/* Skills List */}
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {category.skills.map((skill, skillIndex) => (
-                  <div key={skillIndex} className="cursor-hover group">
-                    {/* Skill Name & Level */}
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-gray-300 text-sm font-medium group-hover:text-white transition-colors">
-                        {skill.name}
-                      </span>
-                      <span className="text-[#ff6b35] font-mono text-xs">
-                        {skill.level}%
-                      </span>
+                  <div key={skillIndex} className="text-center">
+                    {/* Skill Name */}
+                    <div className="text-sm text-gray-300 mb-2">
+                      {skill.name}
+                    </div>
+                    
+                    {/* Percentage */}
+                    <div className="text-xs text-[#ff6b35] font-mono mb-2">
+                      {skill.level}%
                     </div>
 
                     {/* Progress Bar */}
-                    <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                    <div className="mx-auto w-16 h-1 bg-gray-700 rounded-full">
                       <div 
-                        className={`skill-bar h-full bg-gradient-to-r ${skill.color} rounded-full relative`}
-                        style={{ width: `${skill.level}%` }}
-                      >
-                        <div className="absolute inset-0 bg-white/20 animate-pulse" />
-                      </div>
+                        className={`h-full bg-gradient-to-r ${skill.color} rounded-full transition-all duration-1000`}
+                        style={{ width: `${(skill.level / 100) * 100}%` }}
+                      />
                     </div>
                   </div>
                 ))}

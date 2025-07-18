@@ -66,7 +66,7 @@ export function HeroSection() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 text-center px-6 max-w-6xl mx-auto">
+      <div className="relative z-10 text-center px-6 max-w-6xl mx-auto gap-10">
         <h1 
           ref={titleRef}
           className="hero-title text-6xl md:text-8xl lg:text-9xl font-black leading-none mb-6"
@@ -83,7 +83,7 @@ export function HeroSection() {
           Senior Frontend Developer who evolved from Designer through crisis into a Full-Stack specialist
         </p>
 
-        <div className="hero-cta flex flex-col md:flex-row gap-4 justify-center items-center max-w-lg mx-auto">
+        <div className="hero-cta flex flex-col md:flex-row gap-60 justify-center items-center max-w-lg mx-auto mt-55">
           <button className="cursor-hover group relative px-6 py-3 bg-[#ff6b35] text-white rounded-full font-semibold text-base overflow-hidden transition-all duration-300 hover:scale-105 w-full md:w-auto min-w-[160px]">
             <span className="relative z-10">View Journey</span>
             <div className="absolute inset-0 bg-gradient-to-r from-[#ff6b35] to-red-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
