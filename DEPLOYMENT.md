@@ -1,247 +1,312 @@
-# Portfolio Deployment Guide
+# hanzla.com Portfolio Deployment Guide
 
-## 🚀 Automated Deployment Setup
+## 🚀 Automated Static Deployment to CyberPanel
 
-### Prerequisites
-- Ubuntu/Debian server with root access
-- Domain name pointing to your server
-- GitHub repository for your portfolio
+Your portfolio is configured to deploy automatically to `hanzla.com` as a static site.
 
----
+### Step 1: Configure Next.js for Static Export
 
-## 📋 Step-by-Step Instructions
+Update your `next.config.js`:
 
-### 1. Server Initial Setup
+```javascript
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  output: 'export',
+  trailingSlash: true,
+  images: {
+    unoptimized: true
+  }
+}
 
-```bash
-# Run the setup script on your server
-chmod +x deploy-setup.sh
-./deploy-setup.sh
+module.exports = nextConfig
 ```
 
-### 2. Configure Nginx
+### Step 2: Update package.json Scripts
 
-```bash
-# Copy nginx configuration
-sudo cp nginx-config.conf /etc/nginx/sites-available/your-domain.com
+Add export script to your `package.json`:
 
-# Replace 'your-domain.com' with your actual domain
-sudo sed -i 's/your-domain.com/yourdomain.com/g' /etc/nginx/sites-available/yourdomain.com
-
-# Enable the site
-sudo ln -s /etc/nginx/sites-available/yourdomain.com /etc/nginx/sites-enabled/
-
-# Remove default nginx site
-sudo rm /etc/nginx/sites-enabled/default
-
-# Test nginx configuration
-sudo nginx -t
-
-# Restart nginx
-sudo systemctl restart nginx
+```json
+{
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "export": "next build && next export",
+    "start": "next start",
+    "lint": "next lint"
+  }
+}
 ```
 
-### 3. SSL Certificate with Let's Encrypt
+### Step 3: GitHub Actions for Static Deployment
 
-```bash
-# Install Certbot
-sudo apt install certbot python3-certbot-nginx -y
+Create `.github/workflows/deploy.yml`:
 
-# Get SSL certificate
-sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
+```yaml
+name: Deploy Static Site to CyberPanel
 
-# Test auto-renewal
-sudo certbot renew --dry-run
-```
+on:
+  push:
+    branches: [ main ]
 
-### 4. GitHub Secrets Configuration
-
-Go to your GitHub repository → Settings → Secrets and variables → Actions
-
-Add these secrets:
-
-| Secret Name | Value | Description |
-|-------------|-------|-------------|
-| `HOST` | `your-server-ip` | Your server's IP address |
-| `USERNAME` | `your-username` | SSH username (usually ubuntu/root) |
-| `SSH_KEY` | `your-private-key` | Your SSH private key |
-| `PORT` | `22` | SSH port (usually 22) |
-
-### 5. Generate SSH Key for GitHub Actions
-
-```bash
-# On your local machine
-ssh-keygen -t rsa -b 4096 -C "github-actions"
-
-# Copy public key to server
-ssh-copy-id -i ~/.ssh/id_rsa.pub user@your-server-ip
-
-# Copy private key content for GitHub secret
-cat ~/.ssh/id_rsa
-```
-
----
-
-## 🔄 Alternative Deployment Options
-
-### Option A: Vercel (Easiest)
-```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy
-vercel
-
-# Set up automatic deployments
-vercel --prod
-```
-
-### Option B: Netlify
-```bash
-# Install Netlify CLI
-npm install -g netlify-cli
-
-# Build and deploy
-npm run build
-netlify deploy --prod --dir=out
-```
-
-### Option C: Docker + GitHub Actions
-
-```dockerfile
-# Dockerfile
-FROM node:18-alpine
-
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-
-COPY . .
-RUN npm run build
-
-EXPOSE 3000
-CMD ["npm", "start"]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Build and export static site
+      run: |
+        npm run build
+        npx next export
+        
+    - name: Deploy to CyberPanel
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        port: ${{ secrets.PORT }}
+        script: |
+          # Navigate to your domain's public_html
+          cd /home/hanzla.com/public_html
+          
+          # Backup current site
+          if [ -d "backup" ]; then rm -rf backup; fi
+          if [ -d "assets" ]; then mv assets backup_assets; fi
+          if [ -f "index.html" ]; then mv index.html backup_index.html; fi
+          
+          # Clear public_html (keep important files)
+          find . -maxdepth 1 -type f -name "*.html" -delete
+          find . -maxdepth 1 -type d -name "_next" -exec rm -rf {} +
+          find . -maxdepth 1 -type d -name "assets" -exec rm -rf {} +
+          
+    - name: Upload static files
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        port: ${{ secrets.PORT }}
+        source: "out/*"
+        target: "/home/hanzla.com/public_html/"
+        strip_components: 1
+        overwrite: true
+        
+    - name: Set permissions
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        port: ${{ secrets.PORT }}
+        script: |
+          # Set correct permissions
+          cd /home/hanzla.com/public_html
+          chown -R hanzla.com:hanzla.com .
+          find . -type d -exec chmod 755 {} \;
+          find . -type f -exec chmod 644 {} \;
+          
+          echo "✅ Static site deployed successfully!"
 ```
 
 ---
 
-## 🛠️ Troubleshooting
+## 🚀 Alternative: Simple rsync Deployment
 
-### Common Issues:
+Create a simpler deployment script:
 
-**1. Build Fails**
-```bash
-# Check Node version
-node --version
+```yaml
+name: Deploy to CyberPanel (Simple)
 
-# Clear cache and reinstall
-rm -rf node_modules package-lock.json .next
-npm install
-```
+on:
+  push:
+    branches: [ main ]
 
-**2. PM2 Process Issues**
-```bash
-# Check PM2 status
-pm2 status
-
-# View logs
-pm2 logs portfolio
-
-# Restart application
-pm2 restart portfolio
-```
-
-**3. Nginx Issues**
-```bash
-# Check nginx status
-sudo systemctl status nginx
-
-# View error logs
-sudo tail -f /var/log/nginx/error.log
-
-# Test configuration
-sudo nginx -t
-```
-
-**4. SSL Certificate Issues**
-```bash
-# Check certificate status
-sudo certbot certificates
-
-# Renew certificates manually
-sudo certbot renew
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Build static site
+      run: |
+        npm ci
+        npm run build
+        npx next export
+        
+    - name: Deploy via rsync
+      uses: burnett01/rsync-deployments@6.0.0
+      with:
+        switches: -avzr --delete
+        path: out/
+        remote_path: /home/hanzla.com/public_html/
+        remote_host: ${{ secrets.HOST }}
+        remote_user: ${{ secrets.USERNAME }}
+        remote_key: ${{ secrets.SSH_KEY }}
 ```
 
 ---
 
-## 📈 Performance Optimization
+## 🔧 Manual Setup on CyberPanel
 
-### 1. Enable Compression
+### Step 1: Access your server
 ```bash
-# Already included in nginx config
-# Reduces file sizes by ~70%
+ssh your-username@your-server-ip
+cd /home/hanzla.com/public_html
 ```
 
-### 2. CDN Setup (Optional)
-- Cloudflare (Free)
-- AWS CloudFront
-- Vercel Edge Network
-
-### 3. Monitoring Setup
+### Step 2: Create deployment script
 ```bash
-# Install monitoring tools
-npm install -g pm2-logrotate
-pm2 install pm2-logrotate
-
-# Set up log rotation
-pm2 set pm2-logrotate:max_size 10M
-pm2 set pm2-logrotate:retain 30
-```
-
----
-
-## 🔒 Security Best Practices
-
-1. **Firewall Setup**
-```bash
-sudo ufw enable
-sudo ufw allow ssh
-sudo ufw allow 'Nginx Full'
-```
-
-2. **Regular Updates**
-```bash
-# Add to crontab for automatic updates
-0 2 * * 0 apt update && apt upgrade -y
-```
-
-3. **Backup Strategy**
-```bash
-# Backup script
+cat > deploy.sh << 'EOF'
 #!/bin/bash
-tar -czf /backup/portfolio-$(date +%Y%m%d).tar.gz /var/www/your-domain.com
+echo "🚀 Deploying hanzla.com portfolio..."
+
+# Clone/update repository
+if [ ! -d ".git" ]; then
+    git clone https://github.com/your-username/portfolio.git temp_repo
+    mv temp_repo/* .
+    mv temp_repo/.* . 2>/dev/null || true
+    rm -rf temp_repo
+else
+    git pull origin main
+fi
+
+# Install dependencies and build
+npm ci
+npm run build
+npx next export
+
+# Move static files to public_html root
+rm -rf _next assets *.html 2>/dev/null || true
+mv out/* .
+rmdir out
+
+# Set permissions
+chown -R hanzla.com:hanzla.com .
+find . -type d -exec chmod 755 {} \;
+find . -type f -exec chmod 644 {} \;
+
+echo "✅ Deployment complete!"
+EOF
+
+chmod +x deploy.sh
+```
+
+### Step 3: Run first deployment
+```bash
+./deploy.sh
 ```
 
 ---
 
-## 🎯 Final Checklist
+## 📝 GitHub Secrets Setup
 
-- [ ] Server setup completed
-- [ ] Nginx configured and running
-- [ ] SSL certificate installed
-- [ ] GitHub secrets added
-- [ ] First deployment successful
-- [ ] Domain resolving correctly
-- [ ] HTTPS working
-- [ ] PM2 auto-restart enabled
-- [ ] Monitoring set up
+Go to GitHub → Repository → Settings → Secrets and variables → Actions
+
+| Secret | Value |
+|--------|-------|
+| `HOST` | Your server IP |
+| `USERNAME` | Your CyberPanel username |
+| `PASSWORD` | Your password (or use SSH_KEY) |
+| `PORT` | SSH port (usually 22) |
 
 ---
 
-## 📞 Support
+## ✅ Benefits of Static Deployment
 
-If you encounter issues:
-1. Check GitHub Actions logs
-2. Review server logs: `pm2 logs portfolio`
-3. Verify nginx configuration: `sudo nginx -t`
-4. Test deployment manually on server
+1. **No Node.js required** - Just HTML/CSS/JS files
+2. **Faster loading** - Pre-built static files
+3. **Better SEO** - All content is pre-rendered
+4. **Easier maintenance** - No server processes to manage
+5. **Lower resource usage** - Just serving static files
+6. **Built-in caching** - CyberPanel/LiteSpeed caches automatically
+
+---
+
+## 🔧 CyberPanel Optimizations
+
+### 1. Enable LiteSpeed Cache
+- Go to CyberPanel → Websites → List Websites
+- Click hanzla.com → Manage → LiteSpeed Cache
+- Enable cache for static files
+
+### 2. Enable Gzip Compression
+- Go to CyberPanel → Websites → List Websites  
+- Click hanzla.com → Manage → Rewrite Rules
+- Add:
+```apache
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+</IfModule>
+```
+
+### 3. Set Browser Caching
+Add to your .htaccess:
+```apache
+<IfModule mod_expires.c>
+    ExpiresActive on
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+</IfModule>
+```
+
+---
+
+## 🎯 Quick Commands
+
+```bash
+# Manual deployment
+cd /home/hanzla.com/public_html && ./deploy.sh
+
+# Check site status
+curl -I https://hanzla.com
+
+# View CyberPanel logs
+tail -f /usr/local/lsws/logs/access.log
+tail -f /usr/local/lsws/logs/error.log
+```
+
+---
+
+## 📋 Final Checklist
+
+- [ ] Updated next.config.js for static export
+- [ ] GitHub Actions workflow created
+- [ ] GitHub secrets configured
+- [ ] Manual deployment script created
+- [ ] First deployment successful
+- [ ] SSL certificate working
+- [ ] LiteSpeed cache enabled
+- [ ] Gzip compression enabled
+- [ ] Browser caching configured
+
+Your portfolio will now deploy automatically as a static site whenever you push to GitHub! 🎉
