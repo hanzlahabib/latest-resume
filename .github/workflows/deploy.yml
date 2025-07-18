@@ -32,7 +32,7 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
         source: "out/*"
-        target: "/tmp/portfolio_deploy/"
+        target: "/home/hanzla.com/"
         strip_components: 1
         overwrite: true
         debug: true
@@ -45,26 +45,28 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
         script: |
-          # Create temp directory and move files
-          mkdir -p /tmp/portfolio_deploy
+          # Set target directory
+          TARGET_DIR="/home/hanzla.com"
           
-          # Backup current site
-          sudo cp -r /home/hanzla.com/public_html /home/hanzla.com/public_html.backup.$(date +%Y%m%d_%H%M%S) || true
+          # Backup existing files (keep important CyberPanel files)
+          if [ -f "$TARGET_DIR/index.html" ]; then
+            mv "$TARGET_DIR/index.html" "$TARGET_DIR/index.html.backup.$(date +%Y%m%d_%H%M%S)" || true
+          fi
           
-          # Clear public_html and copy new files
-          sudo rm -rf /home/hanzla.com/public_html/*
-          sudo cp -r /tmp/portfolio_deploy/* /home/hanzla.com/public_html/
+          # Clean up old portfolio files (but keep CyberPanel files)
+          rm -f "$TARGET_DIR"/*.html 2>/dev/null || true
+          rm -rf "$TARGET_DIR/_next" 2>/dev/null || true
+          rm -f "$TARGET_DIR/index.txt" 2>/dev/null || true
           
-          # Set correct permissions
-          sudo chown -R hanzla.com:hanzla.com /home/hanzla.com/public_html
-          sudo find /home/hanzla.com/public_html -type d -exec chmod 755 {} \;
-          sudo find /home/hanzla.com/public_html -type f -exec chmod 644 {} \;
-          
-          # Cleanup temp directory
-          rm -rf /tmp/portfolio_deploy
+          # Set correct permissions for uploaded files
+          find "$TARGET_DIR" -name "*.html" -exec chmod 644 {} \; 2>/dev/null || true
+          find "$TARGET_DIR" -name "*.css" -exec chmod 644 {} \; 2>/dev/null || true
+          find "$TARGET_DIR" -name "*.js" -exec chmod 644 {} \; 2>/dev/null || true
+          find "$TARGET_DIR/_next" -type d -exec chmod 755 {} \; 2>/dev/null || true
+          find "$TARGET_DIR/_next" -type f -exec chmod 644 {} \; 2>/dev/null || true
           
           # Create .htaccess for optimization
-          sudo tee /home/hanzla.com/public_html/.htaccess > /dev/null << 'EOF'
+          tee "$TARGET_DIR/.htaccess" > /dev/null << 'EOF'
           # Enable Gzip compression
           <IfModule mod_deflate.c>
               AddOutputFilterByType DEFLATE text/plain
