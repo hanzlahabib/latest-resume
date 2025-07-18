@@ -48,22 +48,13 @@ jobs:
           # Set target directory
           TARGET_DIR="/home/hanzla.com/public_html"
           
-          # Backup existing files (keep important CyberPanel files)
-          if [ -f "$TARGET_DIR/index.html" ]; then
-            mv "$TARGET_DIR/index.html" "$TARGET_DIR/index.html.backup.$(date +%Y%m%d_%H%M%S)" || true
-          fi
+          # List uploaded files to verify deployment
+          echo "📂 Files in public_html after upload:"
+          ls -la "$TARGET_DIR"
           
-          # Clean up old portfolio files (but keep CyberPanel files)
-          rm -f "$TARGET_DIR"/*.html 2>/dev/null || true
-          rm -rf "$TARGET_DIR/_next" 2>/dev/null || true
-          rm -f "$TARGET_DIR/index.txt" 2>/dev/null || true
-          
-          # Set correct permissions for uploaded files
-          find "$TARGET_DIR" -name "*.html" -exec chmod 644 {} \; 2>/dev/null || true
-          find "$TARGET_DIR" -name "*.css" -exec chmod 644 {} \; 2>/dev/null || true
-          find "$TARGET_DIR" -name "*.js" -exec chmod 644 {} \; 2>/dev/null || true
-          find "$TARGET_DIR/_next" -type d -exec chmod 755 {} \; 2>/dev/null || true
-          find "$TARGET_DIR/_next" -type f -exec chmod 644 {} \; 2>/dev/null || true
+          # Set correct permissions for all files
+          find "$TARGET_DIR" -type f -exec chmod 644 {} \; 2>/dev/null || true
+          find "$TARGET_DIR" -type d -exec chmod 755 {} \; 2>/dev/null || true
           
           # Create .htaccess for optimization
           tee "$TARGET_DIR/.htaccess" > /dev/null << 'EOF'
