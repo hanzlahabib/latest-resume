@@ -1,0 +1,41 @@
+name: Deploy Rihal-7 to hanzla.com/rihal-7
+
+on:
+  repository_dispatch:
+    types: [deploy-rihal]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout rihal-7 repository
+      uses: actions/checkout@v4
+      with:
+        repository: your-username/rihal-7  # Replace with actual repo
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Deploy rihal-7 files
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        port: ${{ secrets.PORT }}
+        source: "."
+        target: "/home/hanzla.com/public_html/rihal-7/"
+        overwrite: true
+        
+    - name: Set permissions
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        port: ${{ secrets.PORT }}
+        script: |
+          cd /home/hanzla.com/public_html/rihal-7
+          find . -type f -exec chmod 644 {} \;
+          find . -type d -exec chmod 755 {} \;
+          echo "✅ Rihal-7 deployed to hanzla.com/rihal-7!"

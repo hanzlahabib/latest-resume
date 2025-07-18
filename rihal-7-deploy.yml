@@ -1,0 +1,49 @@
+name: Deploy Rihal-7 to hanzla.com/rihal-7
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout rihal-7 repository
+      uses: actions/checkout@v4
+        
+    - name: Deploy rihal-7 files
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        port: ${{ secrets.PORT }}
+        source: "."
+        target: "/home/hanzla.com/public_html/rihal-7/"
+        overwrite: true
+        rm: true
+        
+    - name: Set permissions and cleanup
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        port: ${{ secrets.PORT }}
+        script: |
+          cd /home/hanzla.com/public_html/rihal-7
+          
+          # Remove git files and other unnecessary files
+          rm -rf .git .github .gitignore README.md 2>/dev/null || true
+          
+          # Set correct permissions
+          find . -type f -exec chmod 644 {} \;
+          find . -type d -exec chmod 755 {} \;
+          
+          # List deployed files
+          echo "📂 Files deployed to hanzla.com/rihal-7:"
+          ls -la
+          
+          echo "✅ Rihal-7 deployed successfully to hanzla.com/rihal-7!"

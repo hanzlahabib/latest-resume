@@ -32,4 +32,8 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts
+next-env.d.tsgithub_deploy_key*
+github_deploy_key
+github_deploy_key.pub
+*.pem
+*.key
