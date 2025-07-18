@@ -32,7 +32,7 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
         source: "out/*"
-        target: "/home/hanzla.com/public_html/"
+        target: "/tmp/portfolio_deploy/"
         strip_components: 1
         overwrite: true
         debug: true
@@ -45,15 +45,26 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
         script: |
-          cd /home/hanzla.com/public_html
+          # Create temp directory and move files
+          mkdir -p /tmp/portfolio_deploy
+          
+          # Backup current site
+          sudo cp -r /home/hanzla.com/public_html /home/hanzla.com/public_html.backup.$(date +%Y%m%d_%H%M%S) || true
+          
+          # Clear public_html and copy new files
+          sudo rm -rf /home/hanzla.com/public_html/*
+          sudo cp -r /tmp/portfolio_deploy/* /home/hanzla.com/public_html/
           
           # Set correct permissions
-          chown -R hanzla.com:hanzla.com .
-          find . -type d -exec chmod 755 {} \;
-          find . -type f -exec chmod 644 {} \;
+          sudo chown -R hanzla.com:hanzla.com /home/hanzla.com/public_html
+          sudo find /home/hanzla.com/public_html -type d -exec chmod 755 {} \;
+          sudo find /home/hanzla.com/public_html -type f -exec chmod 644 {} \;
+          
+          # Cleanup temp directory
+          rm -rf /tmp/portfolio_deploy
           
           # Create .htaccess for optimization
-          cat > .htaccess << 'EOF'
+          sudo tee /home/hanzla.com/public_html/.htaccess > /dev/null << 'EOF'
           # Enable Gzip compression
           <IfModule mod_deflate.c>
               AddOutputFilterByType DEFLATE text/plain
