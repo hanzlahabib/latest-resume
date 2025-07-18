@@ -32,7 +32,7 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
         source: "out/*"
-        target: "/home/hanzla.com/"
+        target: "/home/hanzla.com/public_html/"
         strip_components: 1
         overwrite: true
         debug: true
@@ -46,7 +46,7 @@ jobs:
         port: ${{ secrets.PORT }}
         script: |
           # Set target directory
-          TARGET_DIR="/home/hanzla.com"
+          TARGET_DIR="/home/hanzla.com/public_html"
           
           # Backup existing files (keep important CyberPanel files)
           if [ -f "$TARGET_DIR/index.html" ]; then
