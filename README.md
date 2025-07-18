@@ -1,4 +1,4 @@
-# Hanzla Habib - Portfolio
+# Hanzla Habib - **Portfolio**: [Live Demo](https://hanzla.com)
 
 ## 🚀 Award-Winning Portfolio
 
@@ -93,9 +93,9 @@ This portfolio embodies the philosophy that growth comes through adversity. The 
 
 ## 📞 Contact
 
-- **LinkedIn**: [Hanzla Habib](https://www.linkedin.com/in/hanzla-habib-3a3108263/)
+- **LinkedIn**: Hanzla Habib
 - **Email**: hanzla@example.com
-- **Portfolio**: [Live Demo](https://localhost:3000)
+- **Portfolio**: [Live Demo](https://hanzla.com)
 
 ## 🎖️ Awards & Recognition
 
